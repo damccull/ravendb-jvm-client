@@ -686,6 +686,17 @@ public class RequestExecutor implements CleanCloseable {
         execute(chosenNode, nodeIndex, command, shouldRetry, sessionInfo, null);
     }
 
+    /**
+     * Executes the command via an http request to the chosen node.
+     * 
+     * @param <TResult> TResult - The type of the result
+     * @param chosenNode A ServerNode representing the node this request should be executed on
+     * @param nodeIndex An integer representing the index of the chosen server node
+     * @param command The RavenCommand to be executed
+     * @param shouldRetry A boolean indicating hether or not the command should be retried on failure
+     * @param sessionInfo A SessionInfo object...
+     * @param requestRef A reference to an HttpBaseRequest on which to operate
+     */
     @SuppressWarnings({"ConstantConditions"})
     public <TResult> void execute(ServerNode chosenNode, Integer nodeIndex, RavenCommand<TResult> command, boolean shouldRetry, SessionInfo sessionInfo, Reference<HttpRequestBase> requestRef) {
         if (command.failoverTopologyEtag == INITIAL_TOPOLOGY_ETAG) {
