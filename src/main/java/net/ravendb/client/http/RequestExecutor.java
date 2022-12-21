@@ -307,18 +307,59 @@ public class RequestExecutor implements CleanCloseable {
         this._firstBroadcastAttemptTimeout = conventions.getFirstBroadcastAttemptTimeout();
     }
 
+    /**
+     * Creates a new {@link RequestExecutor} and triggers an initial topology update for the database topology.
+     * 
+     * @param databaseName A {@link String} containing the name of the database on which to execute requests
+     * @param certificate A {@link KeyStore} containing the client certificate to be used when connecting to a node
+     * @param keyPassword An array of char containing the password for the authentication certificate
+     * @param trustStore A {@link KeyStore} containing the public certificate chain of the node being connected to
+     * @param conventions A {@link DocumentConventions} object containing any conventions to be used for requests by this {@link RequestExecutor}
+     * @param executorService An {@link ExecutorService} to be used for executing tasks
+     * @param initialUrls An array of {@link String} containing the initial set of one or more URLs pointing to nodes within a single cluster
+     */
     public static RequestExecutor create(String[] initialUrls, String databaseName, KeyStore certificate, char[] keyPassword, KeyStore trustStore, ExecutorService executorService, DocumentConventions conventions) {
         RequestExecutor executor = new RequestExecutor(databaseName, certificate, keyPassword, trustStore, conventions, executorService, initialUrls);
         executor._firstTopologyUpdate = executor.firstTopologyUpdate(initialUrls, GLOBAL_APPLICATION_IDENTIFIER);
         return executor;
     }
 
+    /**
+     * Creates a new {@link RequestExecutor} for a single node, allowing for configuration updates, and triggers an
+     * initial topology update for the database topology.
+     * 
+     * It does this by calling {@link #createForSingleNodeWithoutConfigurationUpdates}, then re-enabling client configuration updates.
+     * 
+     * @param databaseName A {@link String} containing the name of the database on which to execute requests
+     * @param certificate A {@link KeyStore} containing the client certificate to be used when connecting to a node
+     * @param keyPassword An array of char containing the password for the authentication certificate
+     * @param trustStore A {@link KeyStore} containing the public certificate chain of the node being connected to
+     * @param conventions A {@link DocumentConventions} object containing any conventions to be used for requests by this {@link RequestExecutor}
+     * @param executorService An {@link ExecutorService} to be used for executing tasks
+     * @param initialUrls An array of {@link String} containing the initial set of one or more URLs pointing to nodes within a single cluster
+     */
     public static RequestExecutor createForSingleNodeWithConfigurationUpdates(String url, String databaseName, KeyStore certificate, char[] keyPassword, KeyStore trustStore, ExecutorService executorService, DocumentConventions conventions) {
         RequestExecutor executor = createForSingleNodeWithoutConfigurationUpdates(url, databaseName, certificate, keyPassword, trustStore, executorService, conventions);
         executor._disableClientConfigurationUpdates = false;
         return executor;
     }
 
+    /**
+     * Creates a new {@link RequestExecutor} for a single node and disables configuration updates, and triggers an
+     * initial topology update for the database topology.
+     * 
+     * It does this by initially creating a regular, cluster-based {@link RequestExecutor}, then replaces the topology with
+     * an empty {@link Topology}, disables topology and client configuration updates, and manually adds a single server node
+     * to the {@link NodeSelector}.
+     * 
+     * @param databaseName A {@link String} containing the name of the database on which to execute requests
+     * @param certificate A {@link KeyStore} containing the client certificate to be used when connecting to a node
+     * @param keyPassword An array of char containing the password for the authentication certificate
+     * @param trustStore A {@link KeyStore} containing the public certificate chain of the node being connected to
+     * @param conventions A {@link DocumentConventions} object containing any conventions to be used for requests by this {@link RequestExecutor}
+     * @param executorService An {@link ExecutorService} to be used for executing tasks
+     * @param initialUrls An array of {@link String} containing the initial set of one or more URLs pointing to nodes within a single cluster
+     */
     public static RequestExecutor createForSingleNodeWithoutConfigurationUpdates(String url, String databaseName, KeyStore certificate, char[] keyPassword, KeyStore trustStore, ExecutorService executorService, DocumentConventions conventions) {
         final String[] initialUrls = validateUrls(new String[]{url}, certificate);
 
