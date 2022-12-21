@@ -278,6 +278,20 @@ public class RequestExecutor implements CleanCloseable {
         return trustStore;
     }
 
+    /**
+     * Constructs a new {@link RequestExecutor} associated with a specific database.
+     * 
+     * This method is protected and can't be directly called from outside the library.
+     * It is used internally by the {@link #create create} method.
+     * 
+     * @param databaseName A {@link String} containing the name of the database on which to execute requests
+     * @param certificate A {@link KeyStore} containing the client certificate to be used when connecting to a node
+     * @param keyPassword An array of char containing the password for the authentication certificate
+     * @param trustStore A {@link KeyStore} containing the public certificate chain of the node being connected to
+     * @param conventions A {@link DocumentConventions} object containing any conventions to be used for requests by this {@link RequestExecutor}
+     * @param executorService An {@link ExecutorService} to be used for executing tasks
+     * @param initialUrls An array of {@link String} containing the initial set of one or more URLs pointing to nodes within a single cluster
+     */
     protected RequestExecutor(String databaseName, KeyStore certificate, char[] keyPassword, KeyStore trustStore, DocumentConventions conventions, ExecutorService executorService, String[] initialUrls) {
         cache = new HttpCache(conventions.getMaxHttpCacheSize());
         _executorService = executorService;
